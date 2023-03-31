@@ -17,10 +17,9 @@ taperFunc   = @(x,L) tanh((pi./L).*x);
 
 %% Calculate distances
 reflat1     = obj.p(obj.op.nbdv(1),2);
-dlonlat1    = [0 0 ; diff(obj.p(obj.op.nbdv,:))];
+dlonlat1    = diff(obj.p(obj.op.nbdv,:));
 
 reflat2     = obj.p(obj.op.nbdv(end),2);
-dlonlat2    = [0 0 ; diff(flipud(obj.p(obj.op.nbdv,:)))];
 
 % Convert to meters; simple
 dyFunc      = @(dlat,reflat) (111132.92 - 559.82*cosd(2*reflat) + 1.175*cosd(4*reflat) - 0.0023*cosd(6*reflat)) .*dlat;
@@ -29,19 +28,19 @@ dxFunc      = @(dlon,reflat) (111412.84*cosd(reflat) - 93.5*cosd(3*reflat) + 0.1
 dx1         = dxFunc(dlonlat1(:,1),reflat1);
 dy1         = dyFunc(dlonlat1(:,2),reflat1);
 
-dx2         = dxFunc(dlonlat2(:,1),reflat2);
-dy2         = dyFunc(dlonlat2(:,2),reflat2);
+dx2         = dxFunc(dlonlat1(:,1),reflat2);
+dy2         = dyFunc(dlonlat1(:,2),reflat2);
 
-dist1       = cumsum(hypot(dx1,dy1));
-dist2       = cumsum(hypot(dx2,dy2));
+dist1       = [0;cumsum(hypot(dx1,dy1))];
+dist2       = flipud([0;cumsum(flipud(hypot(dx2,dy2)))]);
 
 scaleFactor1 = taperFunc(dist1,xShoreLengthScale);
 scaleFactor2 = taperFunc(dist2,xShoreLengthScale);
 
 % Only apply to nodes within the xShore Length scale provided. Assume that
 % Open boundary beginning and end are at land
-id1         = dist1<=xShoreLengthScale;
-id2         = dist2<=xShoreLengthScale;
+id1         = dist1<=2*xShoreLengthScale;
+id2         = dist2<=2*xShoreLengthScale;
 
 scaleFactor = ones(size(id1));
 scaleFactor(id1) = scaleFactor1(id1);
