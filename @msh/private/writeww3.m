@@ -39,7 +39,7 @@ m=0;
 for i=1:opedat.nope
     for j=1:opedat.nvdll(i)
         m=m+1;
-        fprintf(fid,['%d %s %d %s %d %s %d %s %d %s %d\n'], m,'',15,'',2,'',0,'',0,'',opedat.nbdv(j,i));
+        fprintf(fid,['%d %s %d %s %d %s %d %s %d %s %d\n'], m,'',15,'',2,'',0,'',0,'',full(opedat.nbdv(j,i)));
     end
 end
 for i=1:length(EToV(:,1))
