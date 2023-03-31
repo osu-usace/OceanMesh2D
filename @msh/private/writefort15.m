@@ -88,16 +88,28 @@ fprintf( fid, '%g  \t \t ! STATIM \n',  f15dat.statim ) ;
 fprintf( fid, '%g  \t \t ! REFTIM \n', f15dat.reftim ) ; 
 
 % WTIMINC
-if f15dat.nws == 8
-  fprintf( fid, '%d %d %d %d %d %g', f15dat.wtimnc ) ;
-  fprintf( fid, '  \t ! YYYY MM DD HH24 StormNumber BLAdj \n' ) ;  
-elseif f15dat.nws >= 19
-  fprintf( fid, '%d %d %d %d %d %g %d', f15dat.wtimnc ) ;
-  fprintf( fid, '  \t ! YYYY MM DD HH24 StormNumber BLAdj geofactor \n' ) ;  
-elseif f15dat.nws > 0
-  fprintf( fid, '%d  ', f15dat.wtimnc ) ;
-  fprintf( fid, '  \t ! WTMINC \n' ) ;       
+%%% Simple switch-case to distinguish met/wave/ice parameters
+switch f15dat.nws
+   case 8 
+      fprintf( fid, '%d %d %d %d %d %g', f15dat.wtimnc ) ;
+      fprintf( fid, '  \t ! YYYY MM DD HH24 StormNumber BLAdj \n' ) ;  
+   case {20,120,320,420,12120,12320,12420,12020}  % This had been hardcoded to nws>20, but there are other nws codes that we now need to distinguish
+      fprintf( fid, '%d %d %d %d %d %g %d', f15dat.wtimnc ) ;
+      fprintf( fid, '  \t ! YYYY MM DD HH24 StormNumber BLAdj geofactor \n' ) ;  
+   case {101,301,401}
+      fprintf( fid, '%d \t ! RSTIMINCi\n', f15dat.rstiminc)
+   case {102,302,402}
+      fprintf( fid, '%d %d ! WTIMING, RSTIMINC\n', f15dat.wtiminc, f15dat.rstiminc)
+   case {105,305,405}
+      fprintf( fid, '%d %d ! WTIMING, RSTIMINC\n', f15dat.wtiminc, f15dat.rstiminc)
+   case {106,306,406}
+      fprintf( fid, '%d %d %.6f %.6f %.6f %.6f %d %d ! 	NWLAT NWLON WLATMAX WLONMIN WLATINC WLONINC WTIMINC RSTIMINC\n',f15dat.windgrid,f15dat.wtiminc,f15dat.rstiminc)
+   case {107,307,407} 
+      fprintf( fid, '%d %d ! WTIMINC RSTIMINC\n', f15dat,wtiminc, f15dat.rstiminc)
+   otherwise
+      error('Provided NWS code is not accounted for in writefort15.m -- Please add a case to determine the correct format of the fort.15 WTIMINC line')
 end
+       
   
 % RNDY
 fprintf( fid, '%g   \t \t ! RNDY \n', f15dat.rndy ) ;

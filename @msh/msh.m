@@ -57,6 +57,7 @@ classdef msh
         f19 % A struct for the fort19 non-periodic elevation bc
         f20 % A struct for the fort20 non-periodic flux/ele radiation bc
         f24 % A struct of the fort24 SAL values
+        f26 % A struct of the fort26 SWAN control file
         f2001 % A struct for the fort2001 non-periodic flux/ele sponge bc
         f5354 % A struct for the fort53001/54001 tidal ele/flux sponge bc
         offset63 % A struct for the offset.63 dynamicwaterlevelcorrection file
@@ -215,6 +216,9 @@ classdef msh
                 if ~isempty(obj.f24)
                     writefort24( obj.f24, [fname '.24'], obj.p, varargin);
                 end
+                if ~isempty(obj.f26)
+                    writefort26( obj.f26, [fname '.26'] );
+                end
                 if ~isempty(obj.f5354)
                     writefort5354( obj.f5354, fname );
                 end
@@ -270,6 +274,9 @@ classdef msh
                 end
                 if any(contains(type,'24')) && ~isempty(obj.f24)
                     writefort24( obj.f24, [fname '.24'], obj.p, varargin);
+                end
+                if any(contains(type,'26')) && ~isempty(obj.f26)
+                    writefort26( obj.f26, [fname '.26'] );
                 end
                 if any(contains(type,'5354')) && ~isempty(obj.f5354)
                     writefort5354( obj.f5354, fname );
