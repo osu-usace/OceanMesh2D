@@ -16,11 +16,11 @@ function obj = taperTidalAmplitudes(obj,xShoreLengthScale)
 taperFunc   = @(x,L) tanh((pi./L).*x);
 
 %% Calculate distances
-reflat1     = m.p(m.op.nbdv(1),2);
-dlonlat1    = [0 0 ; diff(m.p(m.op.nbdv))];
+reflat1     = obj.p(obj.op.nbdv(1),2);
+dlonlat1    = [0 0 ; diff(obj.p(obj.op.nbdv))];
 
-reflat2     = m.p(m.op.nbdv(end),2);
-dlonlat2    = [0 0 ; diff(flipud(m.p(m.op.nbdv)))];
+reflat2     = obj.p(obj.op.nbdv(end),2);
+dlonlat2    = [0 0 ; diff(flipud(obj.p(obj.op.nbdv)))];
 
 % Convert to meters; simple
 dyFunc      = @(dlat,reflat) (111132.92 - 559.82*cosd(2*reflat) + 1.175*cosd(4*reflat) - 0.0023*cosd(6*reflat)) .*dlat;
