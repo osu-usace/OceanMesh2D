@@ -50,5 +50,5 @@ scaleFactor(id2) = scaleFactor2(id2);
 %% Loop through constituents and apply taper
 
 for iconst = 1:length(obj.f15.opealpha)
-    obj.f15.opealpha(iconst).val(:,1) = obj.f15.opealpha.val(iconst,1).*scaleFactor;
+    obj.f15.opealpha(iconst).val(:,1) = obj.f15.opealpha(iconst).val(:,1).*scaleFactor;
 end
