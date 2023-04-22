@@ -4,49 +4,50 @@ function obj = taperTidalAmplitudes(obj,xShoreLengthScale)
 % constituents, and a pre-generated f15 field, as well as a cross-shore 
 % length scale, and taper the tidal constituent amplitudes as they approach 
 % the beginning and end of the open boundaries. This is intended to replace
-% the need for sponge boundary conditions
+% the need for radiation boundary conditions near land
 %
 % Put the result into the f15 struct of the msh obj.    
 % 
 %                                                                       
-% Created by David Honegger March 31 2023
+% Created by David Honegger 21 April 2023
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Build tanh taper function
 taperFunc   = @(x,L) tanh((pi./L).*x);
 
+%% Project to meters (grab from tidal_datda_to_ob.m)
+
+% Select desired projection (using m_map)
+proj = 'UTM';
+              
+% Specify limits of grid
+lat_min = min(obj.p(:,2)) - 1; lat_max = max(obj.p(:,2)) + 1;
+lon_min = min(obj.p(:,1)) - 1; lon_max = max(obj.p(:,1)) + 1;
+
+% doing the projection
+m_proj(proj,'lon',[ lon_min lon_max],...
+            'lat',[ lat_min lat_max])
+
+lon = obj.p(obj.op.nbdv,1);
+lat = obj.p(obj.op.nbdv,2);
+[x,y] = m_ll2xy(lon,lat);
+
 %% Calculate distances
-reflat1     = obj.p(obj.op.nbdv(1),2);
-dlonlat1    = diff(obj.p(obj.op.nbdv,:));
 
-reflat2     = obj.p(obj.op.nbdv(end),2);
+dx                  = diff(x);
+dy                  = diff(y);
 
-% Convert to meters; simple
-dyFunc      = @(dlat,reflat) (111132.92 - 559.82*cosd(2*reflat) + 1.175*cosd(4*reflat) - 0.0023*cosd(6*reflat)) .*dlat;
-dxFunc      = @(dlon,reflat) (111412.84*cosd(reflat) - 93.5*cosd(3*reflat) + 0.118*cosd(5*reflat)) .*dlon;
+% Calculate distances from each end of the boundary arc and combine into a
+% single "minimum distance from arc end"
+dists               = hypot(dx,dy);
+distStart           = [0;cumsum(dists)];
+distEnd             = flipud([0;cumsum(flipud(dists))]);
+distVec             = min(distStart,distEnd);
 
-dx1         = dxFunc(dlonlat1(:,1),reflat1);
-dy1         = dyFunc(dlonlat1(:,2),reflat1);
+%% Calculate scale factor from taper function
+scaleFactor = taperFunc(distVec,xShoreLengthScale);
 
-dx2         = dxFunc(dlonlat1(:,1),reflat2);
-dy2         = dyFunc(dlonlat1(:,2),reflat2);
-
-dist1       = [0;cumsum(hypot(dx1,dy1))];
-dist2       = flipud([0;cumsum(flipud(hypot(dx2,dy2)))]);
-
-scaleFactor1 = taperFunc(dist1,xShoreLengthScale);
-scaleFactor2 = taperFunc(dist2,xShoreLengthScale);
-
-% Only apply to nodes within the xShore Length scale provided. Assume that
-% Open boundary beginning and end are at land
-id1         = dist1<=2*xShoreLengthScale;
-id2         = dist2<=2*xShoreLengthScale;
-
-scaleFactor = ones(size(id1));
-scaleFactor(id1) = scaleFactor1(id1);
-scaleFactor(id2) = scaleFactor2(id2);
-
-%% Loop through constituents and apply taper
+%% Loop through constituents and apply taper, overwriting previously written opealpha entries
 
 for iconst = 1:length(obj.f15.opealpha)
     obj.f15.opealpha(iconst).val(:,1) = obj.f15.opealpha(iconst).val(:,1).*scaleFactor;
