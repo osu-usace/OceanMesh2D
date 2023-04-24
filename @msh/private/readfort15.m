@@ -280,7 +280,7 @@ if ( f15dat.nstav > 0 )
     for k = 1: f15dat.nstav
         [val,name] = readlinevecname( fid ) ; 
 
-        f15dat.velstaloc(k,1:2) = val ; 
+        f15dat.velstaloc(k,1:2) = val(1:2) ;
         f15dat.velstaname(k) = name ; 
     end
 end
