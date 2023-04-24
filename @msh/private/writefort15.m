@@ -90,6 +90,11 @@ fprintf( fid, '%g  \t \t ! REFTIM \n', f15dat.reftim ) ;
 % WTIMINC
 %%% Simple switch-case to distinguish met/wave/ice parameters
 switch f15dat.nws
+   case 0
+      % No forcing => no WTIMINC line
+   case 1
+      % Wind stress, every node, every time step => no WTIMINC line
+      % (according to v53 documentation)
    case 8 
       fprintf( fid, '%d %d %d %d %d %g', f15dat.wtimnc ) ;
       fprintf( fid, '  \t ! YYYY MM DD HH24 StormNumber BLAdj \n' ) ;  
