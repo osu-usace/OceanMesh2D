@@ -107,6 +107,8 @@ switch f15dat.nws
       fprintf( fid, '%d %d ! WTIMING, RSTIMINC\n', f15dat.wtiminc, f15dat.rstiminc)
    case {105,305,405}
       fprintf( fid, '%d %d ! WTIMING, RSTIMINC\n', f15dat.wtiminc, f15dat.rstiminc)
+   case {6}
+      fprintf( fid, '%d %d %.6f %.6f %.6f %.6f %d ! 	NWLAT NWLON WLATMAX WLONMIN WLATINC WLONINC WTIMINC\n',f15dat.windgrid,f15dat.wtiminc)
    case {106,306,406}
       fprintf( fid, '%d %d %.6f %.6f %.6f %.6f %d %d ! 	NWLAT NWLON WLATMAX WLONMIN WLATINC WLONINC WTIMINC RSTIMINC\n',f15dat.windgrid,f15dat.wtiminc,f15dat.rstiminc)
    case {107,307,407} 
