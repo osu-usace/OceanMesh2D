@@ -8,10 +8,10 @@ function obj = zeroLandTides(obj,minDepth)
 bop = obj.b(obj.op.nbdv);
 
 % Generate mask for depths less than threshold
-idz = bop =< minDepth;
+idz = bop < minDepth;
 
 % zero the tidal amplitudes for depths less than threshold
 for i = 1:length(obj.f15.opealpha)
-    obj.f15.opealpha(idz,1) = 0;
+    obj.f15.opealpha(i).val(idz,1) = 0;
 end
 
