@@ -7,6 +7,9 @@ function obj = tidal_data_to_ob(obj,tidal_database,const)
 % Requires: m_map for projection                  
 %                                                                       
 % Created by William Pringle March 15 2018
+% 
+% Update to accept scattered (unstructured mesh) input
+% by David Honegger 27 April 2023
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % check entry
@@ -51,18 +54,28 @@ end
 [b_x,b_y] = m_ll2xy(b_lon,b_lat);             
 
 %% Load tide data and make vectors
+% Assess whether data is gridded (e.g. TPXO) or meshed (e.g., ENPAC)
+nci = ncinfo(tidal_database);
+isTri = any(strcmpi(string({nci.Dimensions.Name}),"nk"));
+
 lon = ncread(tidal_database,'lon_z');
 lat = ncread(tidal_database,'lat_z');
 const_t = ncread(tidal_database,'con');
-if min(size(lon)) == 1
-    [lon,lat] = meshgrid(lon,lat); 
+
+if isTri
+    % No need to meshgrid since already in scatter form
+else
+    if min(size(lon)) == 1
+        [lon,lat] = meshgrid(lon,lat); 
+    end
 end
+lon_x = reshape(lon,[],1);
+lat_y = reshape(lat,[],1);
+
 if max(obj.p(:,1)) <= 180
     % change to -180 to 180 format if msh is in that format
     lon(lon > 180) = lon(lon > 180) - 360;
 end
-lon_x = reshape(lon,[],1);
-lat_y = reshape(lat,[],1);
 
 % Delete uncessecary portions
 % First delete by square
@@ -97,19 +110,28 @@ for j = 1:obj.f15.nbfr
         obj.f15.opealpha(j).val = 0*[b_x b_x];            
         continue
     end
-        % For real part
-    if min(size(const_t)) > 1
-        Re_now = ncread(tidal_database,'hRe',[1 1 k],[size(lon) 1]);
+    % For real part
+    if isTri
+        Re_now = ncread(tidal_database,'hRe',[1 k],[inf 1]);
     else
-        Re_now = double(ncread(tidal_database,'hRe'))/1000;
+        if min(size(const_t)) > 1
+            Re_now = ncread(tidal_database,'hRe',[1 1 k],[size(lon) 1]);
+        else
+            Re_now = double(ncread(tidal_database,'hRe'))/1000;
+        end
     end
     % reshape to vector
     Re_now = reshape(Re_now,[],1);
+
     % For imaginary part
-    if min(size(const_t)) > 1
-        Im_now = ncread(tidal_database,'hIm',[1 1 k],[size(lon) 1]);
+    if isTri
+        Im_now = ncread(tidal_database,'hIm',[1 k],[inf 1]);
     else
-        Im_now = double(ncread(tidal_database,'hIm'))/1000;
+        if min(size(const_t)) > 1
+            Im_now = ncread(tidal_database,'hIm',[1 1 k],[size(lon) 1]);
+        else
+            Im_now = double(ncread(tidal_database,'hIm'))/1000;
+        end
     end
     % reshape to vector    
     Im_now = reshape(Im_now,[],1);
