@@ -32,7 +32,8 @@ end
 load('tide_fac_constants.mat','const');
 cnstit.NR.lind = nan*ones(size(incnstit,1),1);
 for j = 1:length(incnstit)
-    lind1 = strmatch(incnstit{j},const.name);
+%     lind1 = strmatch(incnstit{j},const.name);
+    lind1 = find(strcmpi(strtrim(incnstit{j}),strtrim(string(const.name))));
     if isempty(lind1)
         error(['tide_fac: unrecognized non-reference constituent: '...
                incnstit{j} '.']);
