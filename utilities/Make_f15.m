@@ -197,7 +197,7 @@ if isempty(obj.f15)
     f15dat.controllist(1).var(4).name = 'outputWindDrag';
     f15dat.controllist(1).var(4).val = 'F'; 
     f15dat.controllist(1).var(5).name = 'invertedBarometerOnElevationBoundary';
-    f15dat.controllist(1).var(5).val = 'F'; 
+    f15dat.controllist(1).var(5).val = 'T'; 
     % dynamicwaterlevelcorrection control
     f15dat.controllist(2).type = 'dynamicWaterLevelCorrection';
     f15dat.controllist(2).var(1).name = [f15dat.controllist(2).type 'FileName'];
